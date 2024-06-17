@@ -1,0 +1,32 @@
+services:
+  interactions-db:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+
+  interactions-management:
+    depends_on:
+      - interactions-db
+    environment:
+      CONNECTION_STRING: mongodb://mongoadmin:admin@interactions-db:27017/interactions_management?authSource=admin
+      IDP_ISSUER_URI: http://localhost:4000
+      IDP_JWK_URI: http://localhost:4000/.well-known/jwks.json
+    image: interactions_backend:latest
+    volumes:
+      - interactions-logs:/app/logs
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+
+    networks:
+      - backend
+
+networks:
+  backend:
+volumes:
+  interactions-logs:
